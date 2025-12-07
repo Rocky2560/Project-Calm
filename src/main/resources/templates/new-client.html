@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calm | Add New Client</title>
+    <link rel="stylesheet" href="/css/style.css"  />
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo">🌊 Calm</div>
+        <h1 class="page-title">Add New Client</h1>
+        <p class="page-subtitle">Enter client details below. Fields marked * are required.</p>
+    </header>
+
+    <div class="form-card">
+        <form th:action="@{/clients}" th:object="${client}" method="post">
+            <!-- Personal & Contact Info -->
+            <div class="form-section">
+                <h2 class="section-title">👤 Personal & Contact Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name" class="required">Full Name</label>
+                        <input type="text" id="name" th:field="*{name}" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="required">Email</label>
+                        <input type="email" id="email" th:field="*{email}" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" th:field="*{phone}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" th:field="*{address}"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Official Identifiers -->
+            <div class="form-section">
+                <h2 class="section-title">🆔 Official Identifiers</h2>
+                <p class="section-subtitle">Enter any applicable IDs. Leave blank if not applicable.</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="utr">UTR (Self Assessment)</label>
+                        <input type="text" id="utr" th:field="*{utr}" placeholder="e.g. 1234567890" />
+                    </div>
+                    <div class="form-group">
+                        <label for="companyRegNo">Company Reg No</label>
+                        <input type="text" id="companyRegNo" th:field="*{companyRegNo}" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vatNo">VAT Registration No</label>
+                        <input type="text" id="vatNo" th:field="*{vatNo}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="payrollNo">Payroll Scheme No</label>
+                        <input type="text" id="payrollNo" th:field="*{payrollNo}" />
+                    </div>
+                </div>
+            </div>
+            <!-- Services -->
+            <div class="form-section">
+                <h2 class="section-title">⚙️ Services Required</h2>
+                <p class="section-subtitle">Select all services the client uses.</p>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sa" name="services" value="SA" />
+                        <label for="sa">Self Assessment (SA)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ri" name="services" value="RI" />
+                        <label for="ri">R&D Tax Credits (RI)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="hr" name="services" value="HR" />
+                        <label for="hr">HR & Employment</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ltd" name="services" value="LTD" />
+                        <label for="ltd">Limited Company (LTD)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vat" name="services" value="VAT" />
+                        <label for="vat">VAT Returns</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="payroll" name="services" value="Payroll" />
+                        <label for="payroll">Payroll Processing</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bookkeeping" name="services" value="Bookkeeping" />
+                        <label for="bookkeeping">Bookkeeping</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="accounts" name="services" value="Accounts" />
+                        <label for="accounts">Year-End Accounts</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="form-section">
+                <h2 class="section-title">💷 Benefits</h2>
+                <div class="checkbox-group">
+                    <!-- checkboxes for benefits -->
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="benefitNotes">Additional Notes on Benefits</label>
+                    <textarea id="benefitNotes" th:field="*{benefitNotes}"></textarea>
+                </div>
+            </div>
+
+            <!-- Internal Notes -->
+            <div class="form-section">
+                <h2 class="section-title">📝 Internal Notes</h2>
+                <div class="form-group">
+                    <label for="internalNotes">Initial Notes / Onboarding Tasks</label>
+                    <textarea id="internalNotes" th:field="*{internalNotes}"></textarea>
+                    <p class="form-hint">These are for internal staff only. Will trigger reminders if action needed.</p>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">← Cancel</button>
+                <button type="submit" class="btn btn-primary">✅ Save Client</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

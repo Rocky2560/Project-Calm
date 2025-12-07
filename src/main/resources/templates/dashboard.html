@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calm | Client Management Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css"  />
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="logo">🌊 Calm</div>
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Search clients..." th:value="${searchQuery}" />
+            <button class="btn btn-primary">Search</button>
+            <a th:href="@{/clients/new}">
+                <button class="btn btn-outline">+ New Client</button> </a>
+        </div>
+    </header>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Left Panel: Client List -->
+        <div class="panel">
+            <h2 class="panel-title">Clients</h2>
+            <div class="client-list">
+                <div class="client-card" th:each="client : ${clients}">
+                    <div class="client-header">
+                        <h3 class="client-name" th:text="${client.name}">Sarah Thompson</h3>
+                        <span class="status-badge"
+                              th:classappend="${client.overduePayments > 0} ? 'status-overdue' : ${client.pendingPayments > 0} ? 'status-pending' : 'status-paid'"
+                              th:text="${client.overduePayments > 0} ? 'Overdue' : ${client.pendingPayments > 0} ? 'Pending' : 'Paid'">
+                Pending
+              </span>
+                    </div>
+                    <div class="client-services">
+                        <span class="service-tag" th:each="service : ${client.services}" th:text="${service}">SA</span>
+                    </div>
+                    <div class="client-details">
+                        <div th:text="|📧 ${client.email}|">📧 sarah@example.com</div>
+                        <div th:text="|🆔 UTR: ${client.utr}|">🆔 UTR: 1234567890</div>
+                    </div>
+                    <div class="payment-summary">
+                        <div class="payment-item">
+                            <div class="payment-label">Pending</div>
+                            <div class="payment-value" th:text="${client.pendingPayments}">£1,200</div>
+                        </div>
+                        <div class="payment-item">
+                            <div class="payment-label">Paid (2025)</div>
+                            <div class="payment-value" th:text="${client.paidThisYear}">£4,500</div>
+                        </div>
+                        <div class="payment-item">
+                            <div class="payment-label">Overdue</div>
+                            <div class="payment-value" th:text="${client.overduePayments}">£350</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Dashboard Overview -->
+        <div>
+            <div class="panel alerts">
+                <h2 class="panel-title">⚠️ Alerts</h2>
+
+                <!-- Overdue Clients -->
+                <div class="alert-item" th:if="${overdueClients != null and overdueClients.size() > 0}">
+                    <div th:text="|${overdueClients.size()} client(s) have overdue payments|">
+                        0 clients have overdue payments
+                    </div>
+                </div>
+
+                <!-- Missing Info Clients -->
+                <div class="alert-item" th:if="${missingInfoClients != null and missingInfoClients.size() > 0}">
+                    <div th:text="|${missingInfoClients.size()} client(s) missing required info (UTR/VAT)|">
+                        0 clients missing required info
+                    </div>
+                </div>
+
+                <!-- Upcoming Reminders -->
+                <div class="alert-item" th:if="${upcomingReminders != null and upcomingReminders.size() > 0}">
+                    <div th:text="|${upcomingReminders.size()} email reminders scheduled for today|">
+                        0 email reminders scheduled
+                    </div>
+                </div>
+
+                <!-- Optional: show "No alerts" if everything is empty -->
+                <div class="alert-item" th:if="${(overdueClients == null or overdueClients.isEmpty()) and
+                                        (missingInfoClients == null or missingInfoClients.isEmpty()) and
+                                        (upcomingReminders == null or upcomingReminders.isEmpty())}">
+                    <div>No alerts at this time.</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="panel">
+                <h2 class="panel-title">📝 Recent Meeting Notes</h2>
+                <ul class="notes-list">
+                    <li class="note-item" th:each="note : ${recentNotes}">
+                        <div class="note-date" th:text="${#dates.format(note.date, 'dd MMM yyyy')}">04 Dec 2025</div>
+                        <div class="note-content" th:text="${note.content}">Discussed VAT filing deadline extension. Client to provide receipts by Friday.</div>
+                        <div class="client-name" th:text="${note.clientName}" style="font-size:0.8rem; color:#64748b; margin-top:0.25rem;">→ Sarah Thompson</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">⚡ Quick Actions</h2>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                    <button class="btn btn-outline">Import Client Data</button>
+                    <button class="btn btn-outline">Send All Reminders</button>
+                    <button class="btn btn-outline">Generate Year Report</button>
+                    <button class="btn btn-outline">Missing Info Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
