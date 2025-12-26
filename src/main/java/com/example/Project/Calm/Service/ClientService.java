@@ -1,110 +1,107 @@
 package com.example.Project.Calm.Service;
 
 // src/main/java/com/example/calm/service/ClientService.java
-
-import com.example.Project.Calm.Controller.ClientController;
-import com.example.Project.Calm.DTO.ClientDto;
-import com.example.Project.Calm.DTO.NewClientDto;
-import com.example.Project.Calm.model.Client;
-import com.example.Project.Calm.model.ClientServiceType;
-import com.example.Project.Calm.Repository.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.Project.Calm.DTO.ClientDTO;
+import com.example.Project.Calm.entity.*;
+import com.example.Project.Calm.Repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class ClientService {
+    private final ClientRepository clientRepo;
+    private final UserRepository userRepo;
 
-    @Autowired
-    private ClientRepository clientRepository;
-
-    @Autowired
-    private ReminderService reminderService;
-
-    public List<ClientDto> getAllActiveClients() {
-        return clientRepository.findAll().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public List<ClientDTO> getAllClients(String userId) {
+        return clientRepo.findByUserId(userId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
     }
 
-    public List<Client> findOverdueClients() { return clientRepository.findOverdueClients(); }
+    public List<ClientDTO> searchClients(String userId, String search) {
+        return clientRepo.searchClients(userId, search).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
 
-    public List<Client> findMissingInfoClients() { return clientRepository.findMissingInfoClients(); }
-
-    public ClientDto getClientById(Long id) {
-        Client client = clientRepository.findById(id)
+    public ClientDTO getClient(String id, String userId) {
+        Client client = clientRepo.findById(id)
+                .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> new RuntimeException("Client not found"));
-        return convertToDto(client);
+        return toDTO(client);
     }
 
-    public ClientDto createClient(NewClientDto dto) {
-        Client client = new Client();
+    public ClientDTO createClient(ClientDTO dto, String userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Client client = Client.builder()
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .utr(dto.getUtr())
+                .companyNumber(dto.getCompanyNumber())
+                .status(dto.getStatus() != null ? dto.getStatus() : "active")
+                .services(dto.getServices())
+                .paymentStatus(dto.getPaymentStatus())
+                .loeStatus(dto.getLoeStatus())
+                .photoIdVerified(dto.getPhotoIdVerified())
+                .auth648Submitted(dto.getAuth648Submitted())
+                .amlccVerified(dto.getAmlccVerified())
+                .notes(dto.getNotes())
+                .user(user)
+                .build();
+        return toDTO(clientRepo.save(client));
+    }
+
+    public ClientDTO updateClient(String id, ClientDTO dto, String userId) {
+        Client client = clientRepo.findById(id)
+                .filter(c -> c.getUser().getId().equals(userId))
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+
         client.setName(dto.getName());
         client.setEmail(dto.getEmail());
         client.setPhone(dto.getPhone());
-        client.setAddress(dto.getAddress());
         client.setUtr(dto.getUtr());
-        client.setCompanyRegNo(dto.getCompanyRegNo());
-        client.setVatNo(dto.getVatNo());
-        client.setPayrollNo(dto.getPayrollNo());
+        client.setCompanyNumber(dto.getCompanyNumber());
+        client.setStatus(dto.getStatus());
         client.setServices(dto.getServices());
-        client.setBenefits(dto.getBenefits());
-        client.setBenefitNotes(dto.getBenefitNotes());
-        client.setInternalNotes(dto.getInternalNotes());
-        client.setPendingPayments(0);
-        client.setOverduePayments(0);
-        client.setPaidThisYear(0);
-        client = clientRepository.save(client);
+        client.setPaymentStatus(dto.getPaymentStatus());
+        client.setLoeStatus(dto.getLoeStatus());
+        client.setPhotoIdVerified(dto.getPhotoIdVerified());
+        client.setAuth648Submitted(dto.getAuth648Submitted());
+        client.setAmlccVerified(dto.getAmlccVerified());
+        client.setNotes(dto.getNotes());
+        client.setUpdatedAt(LocalDateTime.now());
 
-        if (isMissingCriticalInfo(client)) {
-            reminderService.scheduleMissingInfoReminder(client.getId());
-        }
-        reminderService.scheduleWelcomeEmail(client.getId());
-        return convertToDto(client);
+        return toDTO(clientRepo.save(client));
     }
 
-    private boolean isMissingCriticalInfo(Client client) {
-        if (client.getUtr() == null || client.getUtr().trim().isEmpty()) return true;
-        if (client.getServices().contains(ClientServiceType.VAT) &&
-                (client.getVatNo() == null || client.getVatNo().trim().isEmpty())) return true;
-        return false;
-    }
-
-    public void updateClient(Long id, NewClientDto dto) {
-        Client client = clientRepository.findById(id)
+    public void deleteClient(String id, String userId) {
+        Client client = clientRepo.findById(id)
+                .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> new RuntimeException("Client not found"));
-        // Update fields
-        clientRepository.save(client);
+        clientRepo.delete(client);
     }
 
-    private ClientDto convertToDto(Client client) {
-        ClientDto dto = new ClientDto();
-        dto.setId(client.getId());
-        dto.setName(client.getName());
-        dto.setEmail(client.getEmail());
-        dto.setPhone(client.getPhone());
-        dto.setAddress(client.getAddress());
-        dto.setUtr(client.getUtr());
-        dto.setCompanyRegNo(client.getCompanyRegNo());
-        dto.setVatNo(client.getVatNo());
-        dto.setPayrollNo(client.getPayrollNo());
-        dto.setServices(client.getServices());
-        dto.setBenefits(client.getBenefits());
-        dto.setBenefitNotes(client.getBenefitNotes());
-        dto.setInternalNotes(client.getInternalNotes());
-        dto.setCreatedAt(client.getCreatedAt());
-        dto.setPendingPayments(client.getPendingPayments());
-        dto.setOverduePayments(client.getOverduePayments());
-        dto.setPaidThisYear(client.getPaidThisYear());
+    private ClientDTO toDTO(Client c) {
+        ClientDTO dto = new ClientDTO();
+        dto.setId(c.getId());
+        dto.setName(c.getName());
+        dto.setEmail(c.getEmail());
+        dto.setPhone(c.getPhone());
+        dto.setUtr(c.getUtr());
+        dto.setCompanyNumber(c.getCompanyNumber());
+        dto.setStatus(c.getStatus());
+        dto.setServices(c.getServices());
+        dto.setPaymentStatus(c.getPaymentStatus());
+        dto.setLoeStatus(c.getLoeStatus());
+        dto.setPhotoIdVerified(c.getPhotoIdVerified());
+        dto.setAuth648Submitted(c.getAuth648Submitted());
+        dto.setAmlccVerified(c.getAmlccVerified());
+        dto.setNotes(c.getNotes());
         return dto;
     }
-
-
-//    List<String> getUpcomingReminders(int limit); // or List<ReminderDto>
-//    List<ClientController.Note> getRecentNotes(int limit);         // Note is com.example.Project.Calm.Controller.ClientController.Note
-    // → Better: define Note in shared model package later
 }

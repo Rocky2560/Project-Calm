@@ -1,0 +1,21 @@
+<!-- templates/layout/main.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CALM - Client Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50">
+<div class="flex h-screen">
+  <!-- Sidebar -->
+  <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto p-6">
+    <div th:replace="${content}"></div>
+  </main>
+</div>
+</body>
+</html>

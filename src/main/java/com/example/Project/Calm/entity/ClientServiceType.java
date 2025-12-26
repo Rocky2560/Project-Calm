@@ -1,5 +1,5 @@
 // src/main/java/com/example/calm/model/ClientServiceType.java
-package com.example.Project.Calm.model;
+package com.example.Project.Calm.entity;
 
 public enum ClientServiceType {
     SA("Self Assessment"),
